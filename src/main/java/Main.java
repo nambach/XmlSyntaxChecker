@@ -1,3 +1,4 @@
+import parser.EntitySyntaxChecker;
 import parser.XmlSyntaxChecker;
 
 public class Main {
@@ -5,5 +6,9 @@ public class Main {
         XmlSyntaxChecker checker = new XmlSyntaxChecker();
         String src = "<h1 checked aa=aa a=\"1\"b='\"2\"'c=3 kl>     <img a=1 a=/>kjkk  <p l p>";
         System.out.println(checker.check(src));
+
+        src = "&apos&#x123;";
+        EntitySyntaxChecker entitySyntaxChecker = new EntitySyntaxChecker();
+        System.out.println(entitySyntaxChecker.check(src));
     }
 }

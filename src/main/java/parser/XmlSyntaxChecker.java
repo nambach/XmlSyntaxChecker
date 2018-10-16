@@ -180,27 +180,42 @@ public class XmlSyntaxChecker {
                                 .append(GT);
 
                         attributes.clear();
-//                        stack.push(openTag.toString());
+
+                        //STACK HERE: push open-tag
+                        if (!INLINE_TAGS.contains(openTag.toString())) {
+                            stack.push(openTag.toString());
+                        }
 
                     } else if (isCloseTag) {
-                        writer.append(LT)
-                                .append(SLASH)
-                                .append(closeTag.toString())
-                                .append(GT);
+//                        writer.append(LT)
+//                                .append(SLASH)
+//                                .append(closeTag.toString())
+//                                .append(GT);
 
-//                        String closeTagName = closeTag.toString();
-//                        while (!stack.isEmpty() && !stack.peek().equals(closeTagName)) {
-//                            writer.append(LT)
-//                                    .append(SLASH)
-//                                    .append(stack.pop())
-//                                    .append(GT);
-//                        }
-//                        if (!stack.isEmpty() && stack.peek().equals(closeTagName)) {
-//                            writer.append(LT)
-//                                    .append(SLASH)
-//                                    .append(stack.pop())
-//                                    .append(GT);
-//                        }
+                        //STACK HERE: pop out open-tag having the same name
+                        String closeTagName = closeTag.toString();
+                        //An open-tag is missing: <a><b><c>...</d>
+                        if (!stack.isEmpty() && !stack.contains(closeTagName)) {
+                            writer.append(LT)
+                                    .append(SLASH)
+                                    .append(stack.pop())
+                                    .append(GT);
+
+                        //A close-tag is missing: <a><b><c>...</a>
+                        } else if (!stack.isEmpty() && stack.contains(closeTagName)) {
+                            while (!stack.isEmpty() && !stack.peek().equals(closeTagName)) {
+                                writer.append(LT)
+                                        .append(SLASH)
+                                        .append(stack.pop())
+                                        .append(GT);
+                            }
+                            if (!stack.isEmpty() && stack.peek().equals(closeTagName)) {
+                                writer.append(LT)
+                                        .append(SLASH)
+                                        .append(stack.pop())
+                                        .append(GT);
+                            }
+                        } //end close-tag missing
                     }
 
                     if (c == LT) {
@@ -244,6 +259,14 @@ public class XmlSyntaxChecker {
 
         if (CONTENT.equals(state)) {
             writer.append(content.toString().trim());
+        }
+
+        //pop out all left tags
+        while (!stack.isEmpty()) {
+            writer.append(LT)
+                    .append(SLASH)
+                    .append(stack.pop())
+                    .append(GT);
         }
         return writer.toString();
     }

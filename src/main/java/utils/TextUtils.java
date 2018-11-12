@@ -1,7 +1,7 @@
 package utils;
 
-import parser.EntitySyntaxChecker;
-import parser.XmlSyntaxChecker;
+import xmlchecker.EntitySyntaxChecker;
+import xmlchecker.XmlSyntaxChecker;
 
 import java.util.Arrays;
 import java.util.List;

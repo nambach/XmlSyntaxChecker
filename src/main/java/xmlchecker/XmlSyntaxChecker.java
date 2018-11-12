@@ -1,11 +1,11 @@
-package parser;
+package xmlchecker;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-import static parser.SyntaxState.*;
+import static xmlchecker.SyntaxState.*;
 
 public class XmlSyntaxChecker {
 

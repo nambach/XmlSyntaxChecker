@@ -1,12 +1,10 @@
 package crawler;
 
-import io.nambm.sachviet.crawler.rule.*;
-import io.nambm.sachviet.utils.DomUtils;
-import io.nambm.sachviet.utils.FileUtils;
-import io.nambm.sachviet.utils.TextUtils;
+import crawler.rule.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import utils.*;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -24,6 +22,15 @@ public class Crawler<T extends CrawlerResultProcessor> {
     private T resultProcessor;
 
     public Crawler() {
+    }
+
+    public Crawler(T resultProcessor) {
+        this.resultProcessor = resultProcessor;
+    }
+
+    public Crawler(T resultProcessor, Rules rules) {
+        this.resultProcessor = resultProcessor;
+        this.rules = rules;
     }
 
     public Crawler(Rules rules) {

@@ -1,11 +1,17 @@
+import crawler.Crawler;
+import crawler.CrawlerResultProcessor;
+import crawler.impl.CrawlerResultProcessorImpl;
+import crawler.rule.Rules;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Entities;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
 import utils.FileUtils;
+import utils.JaxbUtils;
 import utils.TextUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -14,8 +20,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         long start = System.currentTimeMillis();
 
-        String urlString = "https://hangchinhhieu.vn/collections/laptop";
-        test2(urlString);
+        testCrawler();
 
         long end = System.currentTimeMillis();
         System.out.println(end - start);
@@ -43,6 +48,15 @@ public class Main {
         src = Jsoup.clean(src, "", Whitelist.relaxed(), settings);
 
         FileUtils.exportFile(src, FileUtils.getFilePath("file-jsoup.xml"));
+    }
+
+    private static void testCrawler() {
+        CrawlerResultProcessor processor = new CrawlerResultProcessorImpl(true, true, true);
+
+        Rules rules = JaxbUtils.unmarshalling(new File(FileUtils.getFilePath("static/xml/book-rule.xml")), null, Rules.class);
+
+        Crawler<CrawlerResultProcessor> crawler = new Crawler<>(processor, rules);
+        crawler.crawl();
     }
 }
 

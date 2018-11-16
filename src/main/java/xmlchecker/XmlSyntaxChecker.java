@@ -3,7 +3,6 @@ package xmlchecker;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
-import java.util.stream.Collectors;
 
 import static xmlchecker.SyntaxState.*;
 
@@ -175,6 +174,7 @@ public class XmlSyntaxChecker {
                         }
                         writer.append(LT)
                                 .append(openTag.toString())
+                                .append(" ")
                                 .append(convert(attributes))
                                 .append((isEmptyTag ? "/" : ""))
                                 .append(GT);
@@ -277,14 +277,20 @@ public class XmlSyntaxChecker {
         if (attributes.isEmpty()) {
             return "";
         }
-        return attributes.entrySet().stream().map(entry -> {
+
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, String> entry : attributes.entrySet()) {
             String value = entry.getValue()
                     .replaceAll("\"", "&quot;")
                     .replaceAll("'", "&apos;")
                     .replaceAll("<", "&lt;")
                     .replaceAll(">", "&gt;");
 
-            return entry.getKey() + "=" + "\"" + value + "\"";
-        }).collect(Collectors.joining(" ", " ", ""));
+            builder.append(entry.getKey())
+                    .append("=")
+                    .append("\"").append(value).append("\"")
+                    .append(" ");
+        }
+        return builder.toString().trim();
     }
 }

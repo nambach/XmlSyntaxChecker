@@ -34,7 +34,7 @@ public class EntitySyntaxChecker {
 
         boolean isLetter = false;
 
-        int maxLetterLength = LETTER_ENTITIES.stream().map(String::length).max(Integer::compareTo).get();
+        int maxLetterLength = 4; //'quot' and 'apos'
 
         String state = CONTENT;
 

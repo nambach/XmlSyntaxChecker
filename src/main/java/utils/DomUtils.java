@@ -118,7 +118,7 @@ public class DomUtils {
         }
         
         if (attributes != null) {
-            attributes.forEach(element::setAttribute);
+//            attributes.forEach(element::setAttribute);
         }
         
         if (parent != null) {

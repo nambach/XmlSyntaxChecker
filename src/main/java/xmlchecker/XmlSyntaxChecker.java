@@ -169,11 +169,13 @@ public class XmlSyntaxChecker {
 
                 case CLOSE_BRACKET:
                     if (isOpenTag) {
-                        if (INLINE_TAGS.contains(openTag.toString())) {
+                        String openTagName = openTag.toString().toLowerCase();
+                        
+                        if (INLINE_TAGS.contains(openTagName)) {
                             isEmptyTag = true;
                         }
                         writer.append(LT)
-                                .append(openTag.toString())
+                                .append(openTagName)
                                 .append(" ")
                                 .append(convert(attributes))
                                 .append((isEmptyTag ? "/" : ""))
@@ -182,18 +184,14 @@ public class XmlSyntaxChecker {
                         attributes.clear();
 
                         //STACK HERE: push open-tag
-                        if (!INLINE_TAGS.contains(openTag.toString())) {
-                            stack.push(openTag.toString());
+                        if (!isEmptyTag) {
+                            stack.push(openTagName);
                         }
 
                     } else if (isCloseTag) {
-//                        writer.append(LT)
-//                                .append(SLASH)
-//                                .append(closeTag.toString())
-//                                .append(GT);
 
                         //STACK HERE: pop out open-tag having the same name
-                        String closeTagName = closeTag.toString();
+                        String closeTagName = closeTag.toString().toLowerCase();
                         //An open-tag is missing: <a><b><c>...</d>
                         if (!stack.isEmpty() && !stack.contains(closeTagName)) {
                             writer.append(LT)

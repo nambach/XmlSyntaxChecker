@@ -23,13 +23,13 @@ public class CheckerTest {
 
     @Test
     public void checkMissingQuot() {
-        String src = "<h1 aa=  aa>YEAH</h1>";
+        String src = "<h1 aa=  aa><img a=a />YEAH</h1>";
         String result = checker.check(src);
 
         System.out.println(src);
         System.out.println(result);
 
-        Assert.assertEquals(result, "<h1 aa=\"aa\">YEAH</h1>");
+        Assert.assertEquals(result, "<h1 aa=\"aa\"><img a=\"a\"/>YEAH</h1>");
     }
 
     @Test

@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class TextUtils {
 
     public static String refineHtml(String src) {
-//        src = getBody(src);
+        src = getBody(src);
         src = removeMiscellaneousTags(src);
 
         XmlSyntaxChecker xmlSyntaxChecker = new XmlSyntaxChecker();

@@ -28,7 +28,6 @@ public class SyntaxState {
     public static final char EQ = '=';
     public static final char D_QUOT = '"';
     public static final char S_QUOT = '\'';
-    public static final char WS = ' ';
 
     public static final char UNDERSCORE = '_';
     public static final char COLON = ':';
@@ -40,7 +39,8 @@ public class SyntaxState {
     }
 
     private static boolean isNamedChar(char c) {
-        return Character.isLetterOrDigit(c) || UNDERSCORE == c || HYPHEN == c || PERIOD == c;
+        return Character.isLetterOrDigit(c) || UNDERSCORE == c 
+                || HYPHEN == c || PERIOD == c;
     }
 
     public static boolean isStartTagChars(char c) {

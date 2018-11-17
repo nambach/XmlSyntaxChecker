@@ -64,4 +64,15 @@ public class CheckerTest {
 
         Assert.assertEquals(result, "<h1 a=\"true\">YEAH</h1>");
     }
+
+    @Test
+    public void checkEmptyElementCorrect() {
+        String src = "<h1 >  s <img src=\"\"><br><hr/></h1>";
+        String result = checker.check(src);
+
+        System.out.println(src);
+        System.out.println(result);
+
+        Assert.assertEquals(result, "<h1>s<img src=\"\"/><br/><hr/></h1>");
+    }
 }

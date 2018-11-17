@@ -176,7 +176,6 @@ public class XmlSyntaxChecker {
                         }
                         writer.append(LT)
                                 .append(openTagName)
-                                .append(" ")
                                 .append(convert(attributes))
                                 .append((isEmptyTag ? "/" : ""))
                                 .append(GT);
@@ -289,6 +288,12 @@ public class XmlSyntaxChecker {
                     .append("\"").append(value).append("\"")
                     .append(" ");
         }
-        return builder.toString().trim();
+
+        String result =  builder.toString().trim();
+        if (!result.equals("")) {
+            result = " " + result;
+        }
+
+        return result;
     }
 }

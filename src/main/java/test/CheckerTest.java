@@ -75,4 +75,15 @@ public class CheckerTest {
 
         Assert.assertEquals(result, "<h1>s<img src=\"\"/><br/><hr/></h1>");
     }
+
+    @Test
+    public void checkMissingTag() {
+        String src = "<li class=\"s_navi\"> <a href=\"https://pibook.vn/moi-phat-hanh\" class=\"menu-subcate\">Sách mới</a></h3></li>";
+        String result = checker.check(src);
+
+        System.out.println(src);
+        System.out.println(result);
+
+        Assert.assertEquals(result, "<li class=\"s_navi\"><a href=\"https://pibook.vn/moi-phat-hanh\" class=\"menu-subcate\">Sách mới</a></li>");
+    }
 }

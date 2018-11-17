@@ -192,14 +192,11 @@ public class XmlSyntaxChecker {
                         //STACK HERE: pop out open-tag having the same name
                         String closeTagName = closeTag.toString().toLowerCase();
                         //An open-tag is missing: <a><b><c>...</d>
-                        if (!stack.isEmpty() && !stack.contains(closeTagName)) {
-                            writer.append(LT)
-                                    .append(SLASH)
-                                    .append(stack.pop())
-                                    .append(GT);
+                        //Then it must not appear in stack => ignore it
 
                         //A close-tag is missing: <a><b><c>...</a>
-                        } else if (!stack.isEmpty() && stack.contains(closeTagName)) {
+                        //Then it must appear in stack => process it
+                        if (!stack.isEmpty() && stack.contains(closeTagName)) {
                             while (!stack.isEmpty() && !stack.peek().equals(closeTagName)) {
                                 writer.append(LT)
                                         .append(SLASH)

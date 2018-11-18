@@ -3,7 +3,7 @@ import xmlchecker.XmlSyntaxChecker;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Test {
+public class TestChecker {
 
     public static void main(String[] args) {
         XmlSyntaxChecker checker = new XmlSyntaxChecker();

@@ -1,38 +1,54 @@
-package test;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import utils.FileUtils;
 import utils.TextUtils;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 
-public class TextUtilsTest {
+public class TestTextUtils {
 
-    @Test
-    public void testWellformed() throws IOException {
-        String urlString = "https://pibook.vn/moi-phat-hanh";
+    public static void main(String[] args) throws IOException {
+        String[] urls = { "https://pibook.vn/moi-phat-hanh", "https://www.vinabook.com/sach-moi-phat-hanh", "https://meta.vn/may-khoan-c681" };
+
+        for (String url : urls) {
+            testWellformed(url);
+        }
+    }
+
+    private static void testWellformed(String urlString) throws IOException {
         URL url = new URL(urlString);
         URLConnection connection = url.openConnection();
         connection.setReadTimeout(8 * 1000);
         connection.setConnectTimeout(8 * 1000);
 
-        String textContent = FileUtils.getString(connection.getInputStream());
+        String textContent = getString(connection.getInputStream());
 
         textContent = TextUtils.refineHtml(textContent);
 
-        Assert.assertTrue(checkWellformedXml(textContent));
+        if (checkWellformedXml(textContent)) {
+            System.out.println(urlString + " đã well-formed.");
+        }
+    }
+
+    private static String getString(InputStream stream) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+        String line;
+
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+        } catch (IOException ignored) {
+        }
+
+        return stringBuilder.toString();
     }
 
     private static boolean checkWellformedXml(String src) {
@@ -66,7 +82,7 @@ public class TextUtilsTest {
         });
 
         try {
-            Document document = builder.parse(new ByteArrayInputStream(src.getBytes(StandardCharsets.UTF_8)));
+            builder.parse(new ByteArrayInputStream(src.getBytes(StandardCharsets.UTF_8)));
             return true;
         } catch (SAXException | IOException e) {
             return false;

@@ -33,7 +33,9 @@ public class XmlSyntaxChecker {
                 case CONTENT:
                     if (c == LT) {
                         state = OPEN_BRACKET;
-                        writer.append(content.toString().trim().replace("&", "&amp;"));
+                        writer.append(content.toString()
+                                .trim()
+                                .replace("&", "&amp;"));
                     } else {
                         content.append(c);
                     }
@@ -248,8 +250,8 @@ public class XmlSyntaxChecker {
                         state = CLOSE_BRACKET;
                     }
                     break;
-            }
-        }
+            }//end switch state
+        }//end for reader
 
         if (CONTENT.equals(state)) {
             writer.append(content.toString().trim().replace("&", "&amp;"));

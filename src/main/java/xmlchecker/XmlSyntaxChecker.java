@@ -33,7 +33,7 @@ public class XmlSyntaxChecker {
                 case CONTENT:
                     if (c == LT) {
                         state = OPEN_BRACKET;
-                        writer.append(content.toString().trim());
+                        writer.append(content.toString().trim().replace("&", "&amp;"));
                     } else {
                         content.append(c);
                     }
@@ -252,7 +252,7 @@ public class XmlSyntaxChecker {
         }
 
         if (CONTENT.equals(state)) {
-            writer.append(content.toString().trim());
+            writer.append(content.toString().trim().replace("&", "&amp;"));
         }
 
         //pop out all left tags
@@ -275,6 +275,7 @@ public class XmlSyntaxChecker {
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<String, String> entry : attributes.entrySet()) {
             String value = entry.getValue()
+                    .replace("&", "&amp;")
                     .replaceAll("\"", "&quot;")
                     .replaceAll("'", "&apos;")
                     .replaceAll("<", "&lt;")

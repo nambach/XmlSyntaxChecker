@@ -15,9 +15,7 @@ public class TextUtils {
         src = removeMiscellaneousTags(src);
 
         XmlSyntaxChecker xmlSyntaxChecker = new XmlSyntaxChecker();
-        EntitySyntaxChecker entitySyntaxChecker = new EntitySyntaxChecker();
         src = xmlSyntaxChecker.check(src);
-        src = entitySyntaxChecker.check(src);
 
         //crop one more time
         src = getBody(src);
@@ -27,7 +25,7 @@ public class TextUtils {
     private static String getBody(String src) {
         String result = src;
 
-        String expression = "<body.*?<[ ]*/[ ]*body[ ]*>";
+        String expression = "<body.*?</body>";
         Pattern pattern = Pattern.compile(expression);
 
         Matcher matcher = pattern.matcher(result);
@@ -41,17 +39,13 @@ public class TextUtils {
 
     public static String removeMiscellaneousTags(String src) {
         String result = src;
-        List<String> doubleTags = Arrays.asList("script");
-
-        for (String doubleTag : doubleTags) {
-            //Match <singleTag> that contains anything but the phrase "/>", with reluctant matches
-            String expression = "<tag.*?</tag[ ]*>".replaceAll("tag", doubleTag);
-            result = result.replaceAll(expression, "");
-        }
-
+        
+        //Remove all <script> tags
+        String expression = "<script.*?</script>";
+        result = result.replaceAll(expression, "");
 
         //Remove all comments
-        String expression = "<!--.*?-->";
+        expression = "<!--.*?-->";
         result = result.replaceAll(expression, "");
 
         //Remove all whitespace

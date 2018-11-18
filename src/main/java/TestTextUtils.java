@@ -14,7 +14,9 @@ import java.nio.charset.StandardCharsets;
 public class TestTextUtils {
 
     public static void main(String[] args) throws IOException {
-        String[] urls = { "https://pibook.vn/moi-phat-hanh", "https://www.vinabook.com/sach-moi-phat-hanh", "https://meta.vn/may-khoan-c681" };
+        String[] urls = { "https://pibook.vn/moi-phat-hanh", 
+            "https://www.vinabook.com/sach-moi-phat-hanh", 
+            "https://meta.vn/may-khoan-c681" };
 
         for (String url : urls) {
             testWellformed(url);
@@ -41,7 +43,8 @@ public class TestTextUtils {
         StringBuilder stringBuilder = new StringBuilder();
         String line;
 
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+        try (BufferedReader bufferedReader = 
+                new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
             while ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line);
             }

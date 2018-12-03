@@ -7,6 +7,7 @@ public class TestChecker {
 
     public static void main(String[] args) {
         XmlSyntaxChecker checker = new XmlSyntaxChecker();
+        xmlchecker2.XmlSyntaxChecker checker2 = new xmlchecker2.XmlSyntaxChecker();
 
         Map<String, String> map = new LinkedHashMap<>();
         map.put("Attribute không value", "<h1 checked>YEAH</h1>");
@@ -20,6 +21,7 @@ public class TestChecker {
 
             System.out.println(entry.getValue());
             System.out.println(checker.check(entry.getValue()));
+            System.out.println(checker2.check(entry.getValue()));
 
             System.out.println();
         }

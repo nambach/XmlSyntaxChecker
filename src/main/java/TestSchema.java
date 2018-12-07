@@ -114,7 +114,7 @@ public class TestSchema {
                     case ELEMENT_DECLARATION:
                         XSElementDeclaration declaration = (XSElementDeclaration) particleItem.getTerm();
 
-                        System.out.println(indent + "  " + "Name: <" + declaration.getName() + "> " + maxOccurs);
+                        System.out.println(indent + "  " + "Name: <" + declaration.getName() + "> " + particleItem.getMinOccurs() + "-" +maxOccurs);
                         iterate(indent + "  ", declaration.getTypeDefinition());
                         break;
                 }

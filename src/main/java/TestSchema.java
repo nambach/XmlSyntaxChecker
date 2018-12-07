@@ -28,7 +28,7 @@ public class TestSchema {
     }
 
     public static void main(String[] args) {
-        XSModel model = getSchemaModel("src/main/resources/static/xsd/crawling.xsd");
+        XSModel model = getSchemaModel("src/main/resources/static/xsd/book.xsd");
         if (model == null) {
             return;
         }
@@ -40,15 +40,14 @@ public class TestSchema {
         iterate("", declaration.getTypeDefinition());
     }
 
-    private static void iterate(String indent, XSObject element) {
-        XSTypeDefinition typeDefinition = (XSTypeDefinition) element;
+    private static void iterate(String indent, XSTypeDefinition element) {
 
-        switch (typeDefinition.getTypeCategory()) {
+        switch (element.getTypeCategory()) {
             case XSTypeDefinition.SIMPLE_TYPE:
-                displaySimpleType(indent, typeDefinition);
+                displaySimpleType(indent, element);
                 break;
             case XSTypeDefinition.COMPLEX_TYPE:
-                displayComplexType(indent, typeDefinition);
+                displayComplexType(indent, element);
                 break;
         }
 

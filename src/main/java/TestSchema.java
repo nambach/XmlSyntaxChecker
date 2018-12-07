@@ -34,22 +34,10 @@ public class TestSchema {
         }
 
         XSObject root = model.getComponents(ELEMENT_DECLARATION).item(0);
-        System.out.println("Root: " + root.getName());
+        XSElementDeclaration declaration = (XSElementDeclaration) root;
 
-        XSNamespaceItemList list = model.getNamespaceItems();
-        for (int i = 0; i < list.getLength() - 1; i++) {
-            XSNamespaceItem item = list.item(i);
-
-            XSNamedMap complexTypes = item.getComponents(XSTypeDefinition.COMPLEX_TYPE);
-
-            for (int j = 0; j < complexTypes.getLength(); j++) {
-                XSObject object = complexTypes.item(j);
-                if (object.getName().equals(root.getName())) {
-                    iterate("", object);
-                    return;
-                }
-            }
-        }
+        System.out.println("Root: <" + declaration.getName() + "> ");
+        iterate("", declaration.getTypeDefinition());
     }
 
     private static void iterate(String indent, XSObject element) {

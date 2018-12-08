@@ -1,5 +1,7 @@
 import com.sun.org.apache.xerces.internal.impl.xs.XSImplementationImpl;
 import com.sun.org.apache.xerces.internal.xs.*;
+import component.schema.Attribute;
+import component.schema.Element;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 
 import java.util.HashMap;
@@ -13,9 +15,9 @@ public class TestSchema {
     private static Map<Short, String> builtinTypes = new HashMap<>();
 
     static {
-        compositors.put(XSModelGroup.COMPOSITOR_SEQUENCE, "Sequence");
-        compositors.put(XSModelGroup.COMPOSITOR_CHOICE, "Choice");
-        compositors.put(XSModelGroup.COMPOSITOR_ALL, "All");
+        compositors.put(XSModelGroup.COMPOSITOR_SEQUENCE, Element.INDICATOR.SEQUENCE);
+        compositors.put(XSModelGroup.COMPOSITOR_CHOICE, Element.INDICATOR.CHOICE);
+        compositors.put(XSModelGroup.COMPOSITOR_ALL, Element.INDICATOR.ALL);
 
         attrType.put(VC_DEFAULT, "default");
         attrType.put(VC_FIXED, "fixed");
@@ -28,7 +30,7 @@ public class TestSchema {
     }
 
     public static void main(String[] args) {
-        XSModel model = getSchemaModel("src/main/resources/static/xsd/book.xsd");
+        XSModel model = getSchemaModel("src/main/resources/static/xsd/crawling.xsd");
         if (model == null) {
             return;
         }
@@ -36,85 +38,88 @@ public class TestSchema {
         XSObject root = model.getComponents(ELEMENT_DECLARATION).item(0);
         XSElementDeclaration declaration = (XSElementDeclaration) root;
 
-        System.out.println("Root: <" + declaration.getName() + "> ");
-        iterate("", declaration.getTypeDefinition());
+        Element rootElement = new Element(Element.TYPE.ELEMENT_ONLY, declaration.getName(), null);
+        iterate(rootElement, declaration.getTypeDefinition());
+
+        Element.iterateElement("", rootElement);
     }
 
-    private static void iterate(String indent, XSTypeDefinition element) {
+    private static void iterate(Element current, XSTypeDefinition type) {
 
-        switch (element.getTypeCategory()) {
+        switch (type.getTypeCategory()) {
             case XSTypeDefinition.SIMPLE_TYPE:
-                displaySimpleType(indent, element);
+                //displaySimpleType(current, element);
+                current.setType(Element.TYPE.TEXT_ONLY);
                 break;
             case XSTypeDefinition.COMPLEX_TYPE:
-                displayComplexType(indent, element);
+                displayComplexType(current, type);
                 break;
         }
-
-        System.out.println(indent.replace(" ", "-"));
     }
 
-    private static void displaySimpleType(String indent, XSTypeDefinition typeDefinition) {
-        XSSimpleTypeDefinition simpleTypeDefinition = (XSSimpleTypeDefinition) typeDefinition;
-        String type = builtinTypes.get(simpleTypeDefinition.getBuiltInKind());
-        System.out.println(indent + "Simple type, derived from " + type);
+    private static void displaySimpleType(Element current, XSTypeDefinition typeDefinition) {
+//        XSSimpleTypeDefinition simpleTypeDefinition = (XSSimpleTypeDefinition) typeDefinition;
+//        String type = builtinTypes.get(simpleTypeDefinition.getBuiltInKind());
     }
 
-    private static void displayComplexType(String indent, XSTypeDefinition typeDefinition) {
+    private static void displayComplexType(Element current, XSTypeDefinition typeDefinition) {
         XSComplexTypeDefinition complexTypeDefinition = (XSComplexTypeDefinition) typeDefinition;
 
         switch (complexTypeDefinition.getContentType()) {
             case XSComplexTypeDefinition.CONTENTTYPE_EMPTY:
-                System.out.println(indent + "Empty tag");
+                current.setType(Element.TYPE.EMPTY);
                 break;
             case XSComplexTypeDefinition.CONTENTTYPE_SIMPLE:
-                System.out.println(indent + "Text-only, derived from " + complexTypeDefinition.getSimpleType().getName());
+                current.setType(Element.TYPE.TEXT_ONLY);
                 break;
             case XSComplexTypeDefinition.CONTENTTYPE_ELEMENT:
-                System.out.println(indent + "Element-only");
-                analyzeParticle(indent, complexTypeDefinition.getParticle());
+                current.setType(Element.TYPE.ELEMENT_ONLY);
+                analyzeParticle(current, complexTypeDefinition.getParticle());
                 break;
             case XSComplexTypeDefinition.CONTENTTYPE_MIXED:
-                System.out.println(indent + "Mixed");
-                analyzeParticle(indent, complexTypeDefinition.getParticle());
+                current.setType(Element.TYPE.MIXED);
+                analyzeParticle(current, complexTypeDefinition.getParticle());
                 break;
         }
-        displayAttributes(indent, complexTypeDefinition.getAttributeUses());
+        displayAttributes(current, complexTypeDefinition.getAttributeUses());
     }
 
-    private static void displayAttributes(String indent, XSObjectList attrList) {
+    private static void displayAttributes(Element current, XSObjectList attrList) {
         for (int i = 0; i < attrList.getLength(); i++) {
             XSObject xsObject = attrList.item(i);
             XSAttributeUse attributeUse = (XSAttributeUse) xsObject;
 
             String name = attributeUse.getAttrDeclaration().getName();
-            String vcType = attrType.get(attributeUse.getConstraintType());
-            String type = attributeUse.getAttrDeclaration().getTypeDefinition().getName();
-            String required = attributeUse.getRequired() ? "required" : "optional";
+            boolean required = attributeUse.getRequired();
             String defaultValue = attributeUse.getConstraintValue();
 
-            System.out.println(indent + (i + 1) + " - "
-                    + name + " " + type + " " + vcType + " " + required + " " + defaultValue);
+            current.addAttribute(new Attribute(name, defaultValue, required));
         }
     }
 
-    private static void analyzeParticle(String indent, XSParticle particle) {
+    private static void analyzeParticle(Element current, XSParticle particle) {
         if (particle.getTerm().getType() == MODEL_GROUP) {
             XSModelGroup modelGroup = (XSModelGroup) particle.getTerm();
-            System.out.println(indent + compositors.get(modelGroup.getCompositor()));
+
+            String indicator = compositors.get(modelGroup.getCompositor());
+            current.setInnerType(indicator);
 
             XSObjectList list = modelGroup.getParticles();
             for (int i = 0; i < list.getLength(); i++) {
                 XSParticle particleItem = (XSParticle) list.item(i);
 
-                String maxOccurs = particleItem.getMaxOccursUnbounded() ? "unbounded" : particleItem.getMaxOccurs() + "";
-
                 switch (particleItem.getTerm().getType()) {
                     case ELEMENT_DECLARATION:
                         XSElementDeclaration declaration = (XSElementDeclaration) particleItem.getTerm();
 
-                        System.out.println(indent + "  " + "Name: <" + declaration.getName() + "> " + particleItem.getMinOccurs() + "-" +maxOccurs);
-                        iterate(indent + "  ", declaration.getTypeDefinition());
+                        Element innerElement = new Element(null, declaration.getName(), current);
+                        innerElement.setMin(particleItem.getMinOccurs());
+                        innerElement.setMax(particleItem.getMaxOccurs());
+                        innerElement.setUnbounded(particleItem.getMaxOccursUnbounded());
+
+                        current.addInnerElement(innerElement);
+
+                        iterate(innerElement, declaration.getTypeDefinition());
                         break;
                 }
             }

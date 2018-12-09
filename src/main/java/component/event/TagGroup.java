@@ -117,7 +117,7 @@ public class TagGroup {
                 group = createNormalTag(element.getName());
                 break;
             default:
-                return null;
+                return createEmptyTag(element.getName());
         }
 
         if (element.isUnbounded()) {

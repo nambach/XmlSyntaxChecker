@@ -16,12 +16,12 @@ public class XmlEvent {
     private String name;
     private String type;
 
-    private List<XmlEvent> nextEvents;
+    private XmlEventList nextEvents;
 
     public XmlEvent(String name, String type) {
         this.name = name;
         this.type = type;
-        this.nextEvents = new LinkedList<>();
+        this.nextEvents = new XmlEventList();
     }
 
     public String getName() {
@@ -52,12 +52,12 @@ public class XmlEvent {
         return TYPE.TEMP.equals(type);
     }
 
-    XmlEvent addNextEvent(XmlEvent event) {
+    public XmlEvent addNextEvent(XmlEvent event) {
         this.nextEvents.add(event);
         return this;
     }
 
-    public List<XmlEvent> getNextEvents() {
+    public XmlEventList getNextEvents() {
         return nextEvents;
     }
 
@@ -66,7 +66,7 @@ public class XmlEvent {
         return event;
     }
 
-    static XmlEvent createContentEvent() {
+    public static XmlEvent createContentEvent() {
         return new XmlEvent("", TYPE.CONTENT);
     }
 

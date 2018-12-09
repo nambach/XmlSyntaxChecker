@@ -1,7 +1,8 @@
 package component.event;
 
-import java.util.LinkedList;
-import java.util.List;
+import static xmlchecker.SyntaxState.GT;
+import static xmlchecker.SyntaxState.LT;
+import static xmlchecker.SyntaxState.SLASH;
 
 public class XmlEvent {
 
@@ -10,7 +11,6 @@ public class XmlEvent {
         public static final String CLOSE_TAG = "closeTag";
         public static final String EMPTY_TAG = "emptyTag";
         public static final String CONTENT = "content";
-        public static final String TEMP = "temp";
     }
 
     private String name;
@@ -48,10 +48,6 @@ public class XmlEvent {
         return TYPE.CONTENT.equals(type);
     }
 
-    public boolean isTemporary() {
-        return TYPE.TEMP.equals(type);
-    }
-
     public XmlEvent addNextEvent(XmlEvent event) {
         this.nextEvents.add(event);
         return this;
@@ -76,5 +72,19 @@ public class XmlEvent {
                 "name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 '}';
+    }
+
+    public void write(StringBuilder writer) {
+        switch (type) {
+            case TYPE.OPEN_TAG:
+                writer.append(LT).append(name).append(GT);
+                break;
+            case TYPE.CLOSE_TAG:
+                writer.append(LT).append(SLASH).append(name).append(GT);
+                break;
+            case TYPE.EMPTY_TAG:
+                writer.append(LT).append(name).append(SLASH).append(GT);
+                break;
+        }
     }
 }

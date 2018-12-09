@@ -8,6 +8,7 @@ public class XmlEvent {
     public static class TYPE {
         public static final String OPEN_TAG = "openTag";
         public static final String CLOSE_TAG = "closeTag";
+        public static final String EMPTY_TAG = "emptyTag";
         public static final String CONTENT = "content";
         public static final String TEMP = "temp";
     }
@@ -39,6 +40,10 @@ public class XmlEvent {
         return TYPE.CLOSE_TAG.equals(type);
     }
 
+    public boolean isEmptyTag() {
+        return TYPE.EMPTY_TAG.equals(type);
+    }
+
     public boolean isContent() {
         return TYPE.CONTENT.equals(type);
     }
@@ -47,8 +52,29 @@ public class XmlEvent {
         return TYPE.TEMP.equals(type);
     }
 
-    public XmlEvent addNextEvent(XmlEvent event) {
+    XmlEvent addNextEvent(XmlEvent event) {
         this.nextEvents.add(event);
         return this;
+    }
+
+    public List<XmlEvent> getNextEvents() {
+        return nextEvents;
+    }
+
+    XmlEvent chain(XmlEvent event) {
+        this.nextEvents.add(event);
+        return event;
+    }
+
+    static XmlEvent createContentEvent() {
+        return new XmlEvent("", TYPE.CONTENT);
+    }
+
+    @Override
+    public String toString() {
+        return "XmlEvent{" +
+                "name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                '}';
     }
 }

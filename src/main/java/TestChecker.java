@@ -1,3 +1,4 @@
+import utils.FileUtils;
 import xmlchecker.XmlSyntaxChecker;
 
 import java.util.LinkedHashMap;
@@ -6,6 +7,14 @@ import java.util.Map;
 public class TestChecker {
 
     public static void main(String[] args) {
+        XmlSyntaxChecker checker = new XmlSyntaxChecker();
+        checker.setSchema("src/main/resources/static/xsd/book.xsd");
+
+        String src = FileUtils.readTextContent("src/main/resources/static/xml/book.xml");
+        System.out.println(checker.check(src));
+    }
+
+    private static void checkNormal() {
         XmlSyntaxChecker checker = new XmlSyntaxChecker();
 
         Map<String, String> map = new LinkedHashMap<>();

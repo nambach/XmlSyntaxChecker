@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<shop xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<books xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns="http://nambm.io/book"
        xsi:schemaLocation="http://nambm.io/book ../xsd/book.xsd">
     <book>
@@ -7,4 +6,4 @@
         <authors>b</authors>
         <year>2011</year>
     </book>
-</shop>
+</books>

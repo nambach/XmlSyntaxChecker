@@ -4,15 +4,6 @@ import java.util.LinkedList;
 
 public class XmlEventList extends LinkedList<XmlEvent> {
 
-    public XmlEvent getContentEvent() {
-        for (XmlEvent event : this) {
-            if (event.isContent()) {
-                return event;
-            }
-        }
-        return null;
-    }
-
     public XmlEvent getTagEvent(String name, String type) {
         for (XmlEvent event : this) {
             if (event.getName().equals(name) && event.getType().equals(type)) {

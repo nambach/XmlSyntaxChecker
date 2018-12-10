@@ -52,8 +52,14 @@ public class XmlSyntaxChecker {
             switch (state) {
                 case CONTENT:
                     if (c == LT) {
-                        if (events.hasEvent(XmlEvent.TYPE.CONTENT)) {
-                            events = events.getContentEvent().getNextEvents();
+                        if (!content.toString().trim().equals("")) {
+                            while (events.getTagEvent(XmlEvent.TYPE.CONTENT) == null) {
+                                XmlEvent event = events.getNext();
+                                event.write(writer);
+                                events = event.getNextEvents();
+                            }
+
+                            events = events.getTagEvent(XmlEvent.TYPE.CONTENT).getNextEvents();
                         }
 
                         state = OPEN_BRACKET;

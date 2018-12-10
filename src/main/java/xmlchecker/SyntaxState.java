@@ -40,7 +40,7 @@ public class SyntaxState {
 
     private static boolean isNamedChar(char c) {
         return Character.isLetterOrDigit(c) || UNDERSCORE == c 
-                || HYPHEN == c || PERIOD == c;
+                || HYPHEN == c || PERIOD == c || COLON == c;
     }
 
     public static boolean isStartTagChars(char c) {

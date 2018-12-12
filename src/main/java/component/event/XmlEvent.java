@@ -1,5 +1,7 @@
 package component.event;
 
+import component.schema.Element;
+
 import static xmlchecker.SyntaxState.GT;
 import static xmlchecker.SyntaxState.LT;
 import static xmlchecker.SyntaxState.SLASH;
@@ -13,13 +15,18 @@ public class XmlEvent {
         public static final String CONTENT = "content";
     }
 
+    private Element element;
+
     private String name;
     private String type;
+    private boolean buffer = false;
 
+    private XmlEvent relatedEvent;
     private XmlEventList nextEvents;
 
-    public XmlEvent(String name, String type) {
-        this.name = name;
+    public XmlEvent(Element element, String type) {
+        this.element = element;
+        this.name = element.getName();
         this.type = type;
         this.nextEvents = new XmlEventList();
     }
@@ -32,20 +39,28 @@ public class XmlEvent {
         return type;
     }
 
-    public boolean isOpenTag() {
-        return TYPE.OPEN_TAG.equals(type);
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public boolean isCloseTag() {
-        return TYPE.CLOSE_TAG.equals(type);
+    public Element getElement() {
+        return element;
     }
 
-    public boolean isEmptyTag() {
-        return TYPE.EMPTY_TAG.equals(type);
+    public boolean isBuffer() {
+        return buffer;
     }
 
-    public boolean isContent() {
-        return TYPE.CONTENT.equals(type);
+    public void setBuffer(boolean buffer) {
+        this.buffer = buffer;
+    }
+
+    public XmlEvent getRelatedEvent() {
+        return relatedEvent;
+    }
+
+    public void setRelatedEvent(XmlEvent relatedEvent) {
+        this.relatedEvent = relatedEvent;
     }
 
     public XmlEvent addNextEvent(XmlEvent event) {
@@ -62,8 +77,8 @@ public class XmlEvent {
         return event;
     }
 
-    public static XmlEvent createContentEvent() {
-        return new XmlEvent("", TYPE.CONTENT);
+    public static XmlEvent createContentEvent(Element element) {
+        return new XmlEvent(element, TYPE.CONTENT);
     }
 
     @Override

@@ -1,31 +1,25 @@
 package xmlchecker;
 
-import component.event.TagGroup;
 import component.event.XmlEvent;
-import component.event.XmlEventList;
 import component.schema.Element;
 import component.schema.SchemaEngine;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
 
 import static xmlchecker.SyntaxState.*;
 
 public class XmlSyntaxChecker {
 
-    XmlEventList events;
+    private Stack<XmlEvent> stack;
 
     public XmlSyntaxChecker() {
-        events = new XmlEventList();
-        events.add(XmlEvent.createContentEvent());
+        stack = new Stack<>();
     }
 
     public void setSchema(String path) {
         Element rootElement = SchemaEngine.getRootElement(path);
-
-        if (rootElement != null) {
-            TagGroup rootGroup = TagGroup.convert(rootElement);
-            events.get(0).addNextEvent(rootGroup.getOpenTag());
-        }
     }
 
     public String check(String src) {
@@ -52,16 +46,6 @@ public class XmlSyntaxChecker {
             switch (state) {
                 case CONTENT:
                     if (c == LT) {
-                        if (!content.toString().trim().equals("")) {
-                            while (events.getTagEvent(XmlEvent.TYPE.CONTENT) == null) {
-                                XmlEvent event = events.getNext();
-                                event.write(writer);
-                                events = event.getNextEvents();
-                            }
-
-                            events = events.getTagEvent(XmlEvent.TYPE.CONTENT).getNextEvents();
-                        }
-
                         state = OPEN_BRACKET;
                         writer.append(content.toString()
                                 .trim()
@@ -203,20 +187,9 @@ public class XmlSyntaxChecker {
                     if (isOpenTag) {
                         String openTagName = openTag.toString().toLowerCase();
 
-                        String type = XmlEvent.TYPE.OPEN_TAG;
-
                         if (INLINE_TAGS.contains(openTagName)) {
                             isEmptyTag = true;
-                            type = XmlEvent.TYPE.EMPTY_TAG;
                         }
-
-                        while (events.getTagEvent(openTagName, type) == null) {
-                            XmlEvent event = events.getNext();
-                            event.write(writer);
-                            events = event.getNextEvents();
-                        }
-
-                        events = events.getTagEvent(openTagName, type).getNextEvents();
 
                         writer.append(LT)
                                 .append(openTagName)
@@ -225,43 +198,8 @@ public class XmlSyntaxChecker {
                                 .append(GT);
 
                         attributes.clear();
-
-                        //STACK HERE: push open-tag
-//                        if (!isEmptyTag) {
-//                            stack.push(openTagName);
-//                        }
                     } else if (isCloseTag) {
-
-                        //STACK HERE: pop out open-tag having the same name
                         String closeTagName = closeTag.toString().toLowerCase();
-                        //An open-tag is missing: <a><b><c>...</d>
-                        //Then it must not appear in stack => ignore it
-
-                        //A close-tag is missing: <a><b><c>...</a>
-                        //Then it must appear in stack => process it
-//                        if (!stack.isEmpty() && stack.contains(closeTagName)) {
-//                            while (!stack.isEmpty() && !stack.peek().equals(closeTagName)) {
-//                                writer.append(LT)
-//                                        .append(SLASH)
-//                                        .append(stack.pop())
-//                                        .append(GT);
-//                            }
-//                            if (!stack.isEmpty() && stack.peek().equals(closeTagName)) {
-//                                writer.append(LT)
-//                                        .append(SLASH)
-//                                        .append(stack.pop())
-//                                        .append(GT);
-//                            }
-//                        } //end close-tag missing
-
-                        String type = XmlEvent.TYPE.CLOSE_TAG;
-                        while (events.getTagEvent(closeTagName, type) == null) {
-                            XmlEvent event = events.getNext();
-                            event.write(writer);
-                            events = event.getNextEvents();
-                        }
-
-                        events = events.getTagEvent(closeTagName, type).getNextEvents();
 
                         writer.append(LT)
                                 .append(SLASH)
@@ -311,14 +249,6 @@ public class XmlSyntaxChecker {
         if (CONTENT.equals(state)) {
             writer.append(content.toString().trim().replace("&", "&amp;"));
         }
-
-        //pop out all left tags
-//        while (!stack.isEmpty()) {
-//            writer.append(LT)
-//                    .append(SLASH)
-//                    .append(stack.pop())
-//                    .append(GT);
-//        }
         return writer.toString();
     }
 

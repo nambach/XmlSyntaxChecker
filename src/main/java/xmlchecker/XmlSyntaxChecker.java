@@ -4,9 +4,7 @@ import component.schema.data.ElementData;
 import component.schema.template.Element;
 import component.schema.template.SchemaEngine;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 import static xmlchecker.SyntaxState.*;
 
@@ -23,9 +21,14 @@ public class XmlSyntaxChecker {
 
         Element grandElement = new Element(Element.TYPE.ELEMENT_ONLY, "document", null);
         grandElement.addChildElement(rootElement);
+        rootElement.setParent(grandElement);
 
         ElementData grandData = new ElementData(grandElement);
         stack.push(grandData);
+    }
+
+    private boolean checkContentEmpty(StringBuilder content) {
+        return content.toString().trim().equals("");
     }
 
     public String check(String src) {
@@ -50,12 +53,6 @@ public class XmlSyntaxChecker {
                 case CONTENT:
                     if (c == LT) {
                         state = OPEN_BRACKET;
-                        if (!content.toString().trim().equals("")) {
-                            ElementData elementData = stack.peek();
-                            if (elementData.getTemplateElement().getType().equals(Element.TYPE.TEXT_ONLY)) {
-                                elementData.setContent(content.toString().trim());
-                            }
-                        }
                     } else {
                         content.append(c);
                     }
@@ -191,35 +188,72 @@ public class XmlSyntaxChecker {
 
                 case CLOSE_BRACKET:
                     if (isOpenTag) {
+                        //OPEN TAG
                         String openTagName = openTag.toString().toLowerCase();
 
-                        if (!stack.isEmpty()) {
-                            ElementData parentData = stack.peek();
-                            Element parent = parentData.getTemplateElement();
-
-                            Element current = parent.getChildElement(openTagName);
-                            ElementData currentData = new ElementData(current);
-
-                            parentData.addInnerElement(currentData);
-                            currentData.getAttributes().putAll(attributes);
-
-                            stack.push(currentData);
+                        //Process if a close tag is missing: <title> The Alchemist <author>...
+                        ElementData elementData = stack.peek();
+                        if (elementData.isTextOnly()) {
+                            elementData.setContent(content.toString().trim());
+                            stack.pop();
+                        } else {
+                            if (elementData.isElementOnly() && !checkContentEmpty(content)) {
+                                elementData.getAbandonedContents().push(content.toString().trim());
+                            }
                         }
+
+                        //Process if open tag is missing: <books>...<title> (misses the tag <book>)
+                        elementData = stack.peek();
+                        Element currentElement = elementData.getTemplateElement();
+
+                        if (currentElement.containsDescendant(openTagName)) {
+
+                            Element targetElement = currentElement.getDescendantElement(openTagName);
+                            List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
+
+                            for (Element missingElement : missingElements) {
+                                ElementData newElementData = new ElementData(missingElement);
+                                elementData.addInnerElement(newElementData);
+                                stack.push(newElementData);
+                                elementData = newElementData;
+                            }
+
+                            elementData.getAttributes().putAll(attributes);
+                        }
+
                         attributes.clear();
                     } else if (isCloseTag) {
+                        //CLOSE TAG
                         String closeTagName = closeTag.toString().toLowerCase();
 
-                        if (stack.peek().getName().equals(closeTagName)) {
+                        ElementData elementData = stack.peek();
+                        Element currentElement = elementData.getTemplateElement();
+
+                        if (currentElement.getName().equals(closeTagName)) {
+                            elementData.setContent(content.toString().trim());
+                            stack.pop();
+                        } else if (currentElement.containsDescendant(closeTagName)) {
+
+                            Element targetElement = currentElement.getDescendantElement(closeTagName);
+                            List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
+
+                            for (Element missingElement : missingElements) {
+                                ElementData newElementData = new ElementData(missingElement);
+                                elementData.addInnerElement(newElementData);
+                                stack.push(newElementData);
+                                elementData = newElementData;
+                            }
+
+                            elementData.setContent(content.toString().trim());
                             stack.pop();
                         }
                     }
 
+                    content.setLength(0);
                     if (c == LT) {
                         state = OPEN_BRACKET;
                     } else {
                         state = CONTENT;
-
-                        content.setLength(0);
                         content.append(c);
                     }
                     break;
@@ -254,7 +288,7 @@ public class XmlSyntaxChecker {
         }//end for reader
 
 
-        return stack.peek().getInnerElements().get("books").get(0).toString();
+        return stack.peek().toString();
     }
 
     private Character quote;

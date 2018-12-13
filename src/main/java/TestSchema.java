@@ -1,6 +1,8 @@
 import component.schema.template.Element;
 import component.schema.template.SchemaEngine;
 
+import java.util.List;
+
 public class TestSchema {
 
     public static void main(String[] args) {

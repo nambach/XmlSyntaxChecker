@@ -6,6 +6,7 @@ import xmlchecker.XmlSyntaxChecker;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 import static xmlchecker.SyntaxState.*;
 
@@ -16,7 +17,7 @@ public class ElementData {
     private String content = "";
     private LinkedHashMap<String, List<ElementData>> innerElements;
     private LinkedHashMap<String, String> attributes;
-    private List<String> abandonedContents;
+    private Stack<String> abandonedContents;
 
     public ElementData(Element element) {
         this.templateElement = element;
@@ -24,7 +25,7 @@ public class ElementData {
         innerElements = new LinkedHashMap<>();
 
         attributes = new LinkedHashMap<>();
-        abandonedContents = new LinkedList<>();
+        abandonedContents = new Stack<>();
     }
 
     public void addInnerElement(ElementData elementData) {
@@ -36,8 +37,16 @@ public class ElementData {
         innerElements.get(elementName).add(elementData);
     }
 
-    public void addAttribute(String name, String value) {
-        attributes.put(name, value);
+    public boolean isTextOnly() {
+        return templateElement.getType().equals(Element.TYPE.TEXT_ONLY);
+    }
+
+    public boolean isElementOnly() {
+        return templateElement.getType().equals(Element.TYPE.ELEMENT_ONLY);
+    }
+
+    public boolean isEmptyElement() {
+        return templateElement.getType().equals(Element.TYPE.EMPTY);
     }
 
     public Element getTemplateElement() {
@@ -64,12 +73,16 @@ public class ElementData {
         return attributes;
     }
 
-    public List<String> getAbandonedContents() {
+    public Stack<String> getAbandonedContents() {
         return abandonedContents;
     }
 
     @Override
     public String toString() {
+        if (name.equals("document")) {
+            return innerElements.get(templateElement.getChildElements().get(0).getName()).get(0).toString();
+        }
+
         StringBuilder builder = new StringBuilder();
 
         String attributeList = XmlSyntaxChecker.convert(attributes);

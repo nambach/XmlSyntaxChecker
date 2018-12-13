@@ -2,6 +2,7 @@ package component.schema.template;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 public class Element {
     public static class TYPE {
@@ -98,6 +99,10 @@ public class Element {
         return parent;
     }
 
+    public void setParent(Element parent) {
+        this.parent = parent;
+    }
+
     public void addAttribute(Attribute attribute) {
         this.attributes.add(attribute);
     }
@@ -133,6 +138,38 @@ public class Element {
         }
 
         return null;
+    }
+
+    public boolean containsDescendant(String tagName) {
+        return getDescendantElement(tagName) != null;
+    }
+
+    public boolean containsChild(String tagName) {
+        return getChildElement(tagName) != null;
+    }
+
+    /**
+     *
+     * @param parentName exclusive
+     * @return a list of parent tree exclusive from parentName to current
+     */
+    public List<Element> getParentTreeExclusive(String parentName) {
+        Stack<Element> temp = new Stack<>();
+        List<Element> result = new LinkedList<>();
+
+        Element stub = this;
+        do {
+            temp.push(stub);
+            stub = stub.parent;
+            if (stub == null) {
+                return result;
+            }
+        } while (!stub.name.equals(parentName));
+
+        while (!temp.isEmpty()) {
+            result.add(temp.pop());
+        }
+        return result;
     }
 
     public static void iterateElement(String indent, Element element) {

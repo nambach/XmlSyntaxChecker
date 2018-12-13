@@ -1,4 +1,4 @@
-package component.schema;
+package component.schema.template;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class Element {
     private boolean unbounded = false;
 
     private List<Attribute> attributes;
-    private List<Element> innerElements;
+    private List<Element> childElements;
     private String innerType = INDICATOR.SEQUENCE;
 
     private Element parent;
@@ -35,7 +35,7 @@ public class Element {
         this.parent = parent;
 
         attributes = new LinkedList<>();
-        innerElements = new LinkedList<>();
+        childElements = new LinkedList<>();
     }
 
     public String getType() {
@@ -82,8 +82,8 @@ public class Element {
         return attributes;
     }
 
-    public List<Element> getInnerElements() {
-        return innerElements;
+    public List<Element> getChildElements() {
+        return childElements;
     }
 
     public String getInnerType() {
@@ -102,8 +102,37 @@ public class Element {
         this.attributes.add(attribute);
     }
 
-    public void addInnerElement(Element element) {
-        this.innerElements.add(element);
+    public void addChildElement(Element element) {
+        this.childElements.add(element);
+    }
+
+    public Element getChildElement(String name) {
+        for (Element childElement : childElements) {
+            if (childElement.name.equals(name)) {
+                return childElement;
+            }
+        }
+        return null;
+    }
+
+    public Element getDescendantElement(String name) {
+        Element descendant = getChildElement(name);
+
+        if (descendant != null) {
+            return descendant;
+        }
+
+        for (Element childElement : childElements) {
+            if (TYPE.ELEMENT_ONLY.equals(childElement.type)) {
+                descendant = childElement.getDescendantElement(name);
+
+                if (descendant != null) {
+                    return descendant;
+                }
+            }
+        }
+
+        return null;
     }
 
     public static void iterateElement(String indent, Element element) {
@@ -115,7 +144,7 @@ public class Element {
         }
         if (TYPE.ELEMENT_ONLY.equals(element.type)) {
             System.out.println(String.format("%s%s", indent, element.innerType));
-            for (Element innerElement : element.innerElements) {
+            for (Element innerElement : element.childElements) {
                 iterateElement(indent + "  ", innerElement);
             }
         }

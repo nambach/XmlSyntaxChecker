@@ -1,16 +1,13 @@
-package component.schema;
+package component.schema.template;
 
 import com.sun.org.apache.xerces.internal.impl.xs.XSImplementationImpl;
 import com.sun.org.apache.xerces.internal.xs.*;
-import component.event.TagGroup;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.sun.org.apache.xerces.internal.xs.XSConstants.*;
-import static com.sun.org.apache.xerces.internal.xs.XSConstants.ELEMENT_DECLARATION;
-import static com.sun.org.apache.xerces.internal.xs.XSConstants.MODEL_GROUP;
 
 public class SchemaEngine {
 
@@ -121,7 +118,7 @@ public class SchemaEngine {
                         innerElement.setMax(particleItem.getMaxOccurs());
                         innerElement.setUnbounded(particleItem.getMaxOccursUnbounded());
 
-                        current.addInnerElement(innerElement);
+                        current.addChildElement(innerElement);
 
                         iterate(innerElement, declaration.getTypeDefinition());
                         break;

@@ -1,5 +1,5 @@
-import component.schema.Element;
-import component.schema.SchemaEngine;
+import component.schema.template.Element;
+import component.schema.template.SchemaEngine;
 
 public class TestSchema {
 

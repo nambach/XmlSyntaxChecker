@@ -1,4 +1,4 @@
-package component.schema;
+package component.schema.template;
 
 public class Attribute {
     private String name;

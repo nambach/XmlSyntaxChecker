@@ -1,6 +1,6 @@
 package component.event;
 
-import component.schema.Element;
+import component.schema.template.Element;
 
 import static xmlchecker.SyntaxState.GT;
 import static xmlchecker.SyntaxState.LT;

@@ -1,10 +1,10 @@
 package xmlchecker;
 
-import component.event.XmlEvent;
-import component.schema.Element;
-import component.schema.SchemaEngine;
+import component.schema.data.ElementData;
+import component.schema.template.Element;
+import component.schema.template.SchemaEngine;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Stack;
 
@@ -12,7 +12,7 @@ import static xmlchecker.SyntaxState.*;
 
 public class XmlSyntaxChecker {
 
-    private Stack<XmlEvent> stack;
+    private Stack<ElementData> stack;
 
     public XmlSyntaxChecker() {
         stack = new Stack<>();
@@ -20,23 +20,26 @@ public class XmlSyntaxChecker {
 
     public void setSchema(String path) {
         Element rootElement = SchemaEngine.getRootElement(path);
+
+        Element grandElement = new Element(Element.TYPE.ELEMENT_ONLY, "document", null);
+        grandElement.addChildElement(rootElement);
+
+        ElementData grandData = new ElementData(grandElement);
+        stack.push(grandData);
     }
 
     public String check(String src) {
         src = src + " ";
         char[] reader = src.toCharArray();
-        StringBuilder writer = new StringBuilder();
 
         StringBuilder openTag = new StringBuilder();
         boolean isEmptyTag = false, isOpenTag = false, isCloseTag = false;
         StringBuilder closeTag = new StringBuilder();
         StringBuilder attrName = new StringBuilder();
         StringBuilder attrValue = new StringBuilder();
-        Map<String, String> attributes = new HashMap<>();
+        Map<String, String> attributes = new LinkedHashMap<>();
 
         StringBuilder content = new StringBuilder();
-
-//        Stack<String> stack = new Stack<>();
 
         String state = CONTENT;
 
@@ -47,9 +50,12 @@ public class XmlSyntaxChecker {
                 case CONTENT:
                     if (c == LT) {
                         state = OPEN_BRACKET;
-                        writer.append(content.toString()
-                                .trim()
-                                .replace("&", "&amp;"));
+                        if (!content.toString().trim().equals("")) {
+                            ElementData elementData = stack.peek();
+                            if (elementData.getTemplateElement().getType().equals(Element.TYPE.TEXT_ONLY)) {
+                                elementData.setContent(content.toString().trim());
+                            }
+                        }
                     } else {
                         content.append(c);
                     }
@@ -187,24 +193,25 @@ public class XmlSyntaxChecker {
                     if (isOpenTag) {
                         String openTagName = openTag.toString().toLowerCase();
 
-                        if (INLINE_TAGS.contains(openTagName)) {
-                            isEmptyTag = true;
+                        if (!stack.isEmpty()) {
+                            ElementData parentData = stack.peek();
+                            Element parent = parentData.getTemplateElement();
+
+                            Element current = parent.getChildElement(openTagName);
+                            ElementData currentData = new ElementData(current);
+
+                            parentData.addInnerElement(currentData);
+                            currentData.getAttributes().putAll(attributes);
+
+                            stack.push(currentData);
                         }
-
-                        writer.append(LT)
-                                .append(openTagName)
-                                .append(convert(attributes))
-                                .append((isEmptyTag ? "/" : ""))
-                                .append(GT);
-
                         attributes.clear();
                     } else if (isCloseTag) {
                         String closeTagName = closeTag.toString().toLowerCase();
 
-                        writer.append(LT)
-                                .append(SLASH)
-                                .append(closeTagName)
-                                .append(GT);
+                        if (stack.peek().getName().equals(closeTagName)) {
+                            stack.pop();
+                        }
                     }
 
                     if (c == LT) {
@@ -246,15 +253,13 @@ public class XmlSyntaxChecker {
             }//end switch state
         }//end for reader
 
-        if (CONTENT.equals(state)) {
-            writer.append(content.toString().trim().replace("&", "&amp;"));
-        }
-        return writer.toString();
+
+        return stack.peek().getInnerElements().get("books").get(0).toString();
     }
 
     private Character quote;
 
-    private String convert(Map<String, String> attributes) {
+    public static String convert(Map<String, String> attributes) {
         if (attributes.isEmpty()) {
             return "";
         }

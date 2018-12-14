@@ -11,13 +11,14 @@ import static xmlchecker.SyntaxState.*;
 public class XmlSyntaxChecker {
 
     private Stack<ElementData> stack;
+    private Element rootElement;
 
     public XmlSyntaxChecker() {
         stack = new Stack<>();
     }
 
     public void setSchema(String path) {
-        Element rootElement = SchemaEngine.getRootElement(path);
+        rootElement = SchemaEngine.getRootElement(path);
 
         Element grandElement = new Element(Element.TYPE.ELEMENT_ONLY, "document", null);
         grandElement.addChildElement(rootElement);
@@ -31,10 +32,14 @@ public class XmlSyntaxChecker {
         return content.toString().trim().equals("");
     }
 
+    private boolean checkTagExist(String tagName) {
+        return rootElement.containsDescendant(tagName);
+    }
+
     public String check(String src) {
         src = src + " ";
         char[] reader = src.toCharArray();
-
+        System.out.println(reader);
         StringBuilder openTag = new StringBuilder();
         boolean isEmptyTag = false, isOpenTag = false, isCloseTag = false;
         StringBuilder closeTag = new StringBuilder();
@@ -193,8 +198,8 @@ public class XmlSyntaxChecker {
 
                         //Process if a close tag is missing: <title> The Alchemist <author>...
                         ElementData elementData = stack.peek();
-                        if (elementData.isTextOnly()) {
-                            elementData.setContent(content.toString().trim());
+                        if (elementData.isTextOnly() || elementData.isEmptyElement()) {
+                            elementData.setContent(content.toString());
                             stack.pop();
                         } else {
                             if (elementData.isElementOnly() && !checkContentEmpty(content)) {
@@ -207,10 +212,13 @@ public class XmlSyntaxChecker {
                         Element currentElement = elementData.getTemplateElement();
 
                         if (currentElement.containsDescendant(openTagName)) {
+                            //Case 1: current encountered tag is inside top-stack tag, which is one of its descendants, e.g: <books>...<title>
 
+                            //Fetch all the missing open tags, which altogether will form a parent tree from the current tag backwards to the top-stack tag
                             Element targetElement = currentElement.getDescendantElement(openTagName);
                             List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
 
+                            //Create the missing path
                             for (Element missingElement : missingElements) {
                                 ElementData newElementData = new ElementData(missingElement);
                                 elementData.addInnerElement(newElementData);
@@ -219,6 +227,27 @@ public class XmlSyntaxChecker {
                             }
 
                             elementData.getAttributes().putAll(attributes);
+
+                        } else if (checkTagExist(openTagName)) {
+                            //Case 2: current encountered tag is outside top-stack tag, maybe in same level, e.g: <title>...<author>
+
+                            //pop out all tags until finding out the current tag's parent
+                            do {
+                                stack.pop();
+
+                                elementData = stack.peek();
+                                currentElement = elementData.getTemplateElement();
+
+                            } while (!currentElement.containsChild(openTagName));
+
+                            //Insert current tag as normal
+                            Element targetElement = currentElement.getChildElement(openTagName);
+                            ElementData newElementData = new ElementData(targetElement);
+
+                            elementData.addInnerElement(newElementData);
+                            stack.push(newElementData);
+
+                            newElementData.getAttributes().putAll(attributes);
                         }
 
                         attributes.clear();
@@ -230,9 +259,11 @@ public class XmlSyntaxChecker {
                         Element currentElement = elementData.getTemplateElement();
 
                         if (currentElement.getName().equals(closeTagName)) {
-                            elementData.setContent(content.toString().trim());
+                            //case 1: close tag normally
+                            elementData.setContent(content.toString());
                             stack.pop();
                         } else if (currentElement.containsDescendant(closeTagName)) {
+                            //case 2: current close tag is inside top-stack tag (children of top-stack tag)
 
                             Element targetElement = currentElement.getDescendantElement(closeTagName);
                             List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
@@ -244,8 +275,57 @@ public class XmlSyntaxChecker {
                                 elementData = newElementData;
                             }
 
-                            elementData.setContent(content.toString().trim());
+                            elementData.setContent(content.toString());
                             stack.pop();
+
+                        } else if (checkTagExist(closeTagName)) {
+                            //case 2: current close tag is outside top-stack tag (parent tag or a sibling of its parent)
+
+                            if (!checkContentEmpty(content) && elementData.isTextOnly()) {
+                                String contentStr = content.toString();
+                                if (contentStr.contains("\n")) {
+                                    elementData.setContent(contentStr.substring(0, contentStr.indexOf("\n")));
+                                    content.setLength(0);
+                                    content.append(contentStr.substring(contentStr.indexOf("\n")));
+                                } else {
+                                    elementData.setContent(contentStr);
+                                    content.setLength(0);
+                                }
+                            }
+
+                            if (currentElement.containsParent(closeTagName)) {
+                                //case 3.a: current close tag is parent of top-stack tag
+                                do {
+                                    stack.pop();
+
+                                    elementData = stack.peek();
+                                    currentElement = elementData.getTemplateElement();
+
+                                } while (!currentElement.containsChild(closeTagName));
+
+                            } else {
+                                //case 3.b: current close tag is not parent of top-stack tag, but a sibling of its parent
+                                do {
+                                    stack.pop();
+
+                                    elementData = stack.peek();
+                                    currentElement = elementData.getTemplateElement();
+
+                                } while (!currentElement.containsChild(closeTagName));
+
+                                Element targetElement = currentElement.getDescendantElement(closeTagName);
+                                List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
+
+                                for (Element missingElement : missingElements) {
+                                    ElementData newElementData = new ElementData(missingElement);
+                                    elementData.addInnerElement(newElementData);
+                                    stack.push(newElementData);
+                                    elementData = newElementData;
+                                }
+
+                                elementData.setContent(content.toString());
+                                stack.pop();
+                            }
                         }
                     }
 
@@ -288,7 +368,7 @@ public class XmlSyntaxChecker {
         }//end for reader
 
 
-        return stack.peek().toString();
+        return stack.get(0).toString();
     }
 
     private Character quote;

@@ -60,7 +60,7 @@ public class SyntaxState {
     }
 
     public static boolean isSpace(char c) {
-        return Character.isSpaceChar(c);
+        return Character.isSpaceChar(c) || c == '\n';
     }
 
     public static final List<String> INLINE_TAGS = Arrays.asList(

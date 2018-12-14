@@ -62,7 +62,7 @@ public class ElementData {
     }
 
     public void setContent(String content) {
-        this.content = content;
+        this.content = content.trim();
     }
 
     public LinkedHashMap<String, List<ElementData>> getInnerElements() {

@@ -58,6 +58,20 @@ public class XmlSyntaxChecker {
                 case CONTENT:
                     if (c == LT) {
                         state = OPEN_BRACKET;
+
+                        String[] arr = content.toString().split("\n");
+                        List<String> contents = new LinkedList<>();
+                        contents.addAll(Arrays.asList(arr));
+
+                        ElementData elementData = stack.peek();
+                        if (elementData.isTextOnly()) {
+                            elementData.setContent(contents.remove(0));
+                        }
+
+                        for (String contentStr : contents) {
+                            elementData.getAbandonedContents().push(contentStr);
+                        }
+                        content.setLength(0);
                     } else {
                         content.append(c);
                     }
@@ -192,44 +206,14 @@ public class XmlSyntaxChecker {
                     break;
 
                 case CLOSE_BRACKET:
-                    if (isOpenTag) {
+                    if (isOpenTag) {//todo:check tag exist
                         //OPEN TAG
                         String openTagName = openTag.toString().toLowerCase();
 
-                        //Process if a close tag is missing: <title> The Alchemist <author>...
                         ElementData elementData = stack.peek();
-                        if (elementData.isTextOnly() || elementData.isEmptyElement()) {
-                            elementData.setContent(content.toString());
-                            stack.pop();
-                        } else {
-                            if (elementData.isElementOnly() && !checkContentEmpty(content)) {
-                                elementData.getAbandonedContents().push(content.toString().trim());
-                            }
-                        }
-
-                        //Process if open tag is missing: <books>...<title> (misses the tag <book>)
-                        elementData = stack.peek();
                         Element currentElement = elementData.getTemplateElement();
 
-                        if (currentElement.containsDescendant(openTagName)) {
-                            //Case 1: current encountered tag is inside top-stack tag, which is one of its descendants, e.g: <books>...<title>
-
-                            //Fetch all the missing open tags, which altogether will form a parent tree from the current tag backwards to the top-stack tag
-                            Element targetElement = currentElement.getDescendantElement(openTagName);
-                            List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
-
-                            //Create the missing path
-                            for (Element missingElement : missingElements) {
-                                ElementData newElementData = new ElementData(missingElement);
-                                elementData.addInnerElement(newElementData);
-                                stack.push(newElementData);
-                                elementData = newElementData;
-                            }
-
-                            elementData.getAttributes().putAll(attributes);
-
-                        } else if (checkTagExist(openTagName)) {
-                            //Case 2: current encountered tag is outside top-stack tag, maybe in same level, e.g: <title>...<author>
+                        if (!currentElement.containsDescendant(openTagName) && checkTagExist(openTagName)) {
 
                             //pop out all tags until finding out the current tag's parent
                             do {
@@ -238,16 +222,28 @@ public class XmlSyntaxChecker {
                                 elementData = stack.peek();
                                 currentElement = elementData.getTemplateElement();
 
-                            } while (!currentElement.containsChild(openTagName));
+                            } while (!currentElement.containsDescendant(openTagName));
+                        }
 
-                            //Insert current tag as normal
-                            Element targetElement = currentElement.getChildElement(openTagName);
-                            ElementData newElementData = new ElementData(targetElement);
+                        //Insert current tag as normal
+                        Element targetElement = currentElement.getDescendantElement(openTagName);
+                        List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
+
+                        //Create the missing path
+                        for (Element missingElement : missingElements) {
+                            ElementData newElementData = new ElementData(missingElement);
 
                             elementData.addInnerElement(newElementData);
                             stack.push(newElementData);
 
-                            newElementData.getAttributes().putAll(attributes);
+                            elementData = newElementData;
+                        }
+
+                        elementData.getAttributes().putAll(attributes);
+
+                        //don't account empty tag
+                        if (elementData.isEmptyElement()) {
+                            stack.pop();
                         }
 
                         attributes.clear();
@@ -257,61 +253,22 @@ public class XmlSyntaxChecker {
 
                         ElementData elementData = stack.peek();
                         Element currentElement = elementData.getTemplateElement();
+                        ElementData oldElementData = stack.peek();
 
                         if (currentElement.getName().equals(closeTagName)) {
                             //case 1: close tag normally
-                            elementData.setContent(content.toString());
                             stack.pop();
-                        } else if (currentElement.containsDescendant(closeTagName)) {
-                            //case 2: current close tag is inside top-stack tag (children of top-stack tag)
-
-                            Element targetElement = currentElement.getDescendantElement(closeTagName);
-                            List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
-
-                            for (Element missingElement : missingElements) {
-                                ElementData newElementData = new ElementData(missingElement);
-                                elementData.addInnerElement(newElementData);
-                                stack.push(newElementData);
-                                elementData = newElementData;
-                            }
-
-                            elementData.setContent(content.toString());
-                            stack.pop();
-
                         } else if (checkTagExist(closeTagName)) {
-                            //case 2: current close tag is outside top-stack tag (parent tag or a sibling of its parent)
 
-                            if (!checkContentEmpty(content) && elementData.isTextOnly()) {
-                                String contentStr = content.toString();
-                                if (contentStr.contains("\n")) {
-                                    elementData.setContent(contentStr.substring(0, contentStr.indexOf("\n")));
-                                    content.setLength(0);
-                                    content.append(contentStr.substring(contentStr.indexOf("\n")));
-                                } else {
-                                    elementData.setContent(contentStr);
-                                    content.setLength(0);
-                                }
+                            while (!currentElement.containsDescendant(closeTagName)) {
+                                stack.pop();
+
+                                elementData = stack.peek();
+                                currentElement = elementData.getTemplateElement();
                             }
 
-                            if (currentElement.containsParent(closeTagName)) {
-                                //case 3.a: current close tag is parent of top-stack tag
-                                do {
-                                    stack.pop();
-
-                                    elementData = stack.peek();
-                                    currentElement = elementData.getTemplateElement();
-
-                                } while (!currentElement.containsChild(closeTagName));
-
-                            } else {
+                            if (!oldElementData.getTemplateElement().containsParent(closeTagName)) {
                                 //case 3.b: current close tag is not parent of top-stack tag, but a sibling of its parent
-                                do {
-                                    stack.pop();
-
-                                    elementData = stack.peek();
-                                    currentElement = elementData.getTemplateElement();
-
-                                } while (!currentElement.containsChild(closeTagName));
 
                                 Element targetElement = currentElement.getDescendantElement(closeTagName);
                                 List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
@@ -323,7 +280,10 @@ public class XmlSyntaxChecker {
                                     elementData = newElementData;
                                 }
 
-                                elementData.setContent(content.toString());
+                                String contentStr = !oldElementData.getAbandonedContents().isEmpty()
+                                        ? oldElementData.getAbandonedContents().pop()
+                                        : "";
+                                elementData.setContent(contentStr);
                                 stack.pop();
                             }
                         }

@@ -93,6 +93,8 @@ public class XmlSyntaxChecker {
                         isOpenTag = false;
                         isCloseTag = true;
                         isEmptyTag = false;
+                    } else if (c == QUESTION_MARK) {
+                        state = PROCESS_INSTRUCTION;
                     }
                     break;
 
@@ -322,6 +324,12 @@ public class XmlSyntaxChecker {
 
                     } else if (c == GT) {
                         state = CLOSE_BRACKET;
+                    }
+                    break;
+
+                case PROCESS_INSTRUCTION:
+                    if (c == GT) {
+                        state = CONTENT;
                     }
                     break;
             }//end switch state

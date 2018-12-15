@@ -20,6 +20,7 @@ public class SyntaxState {
     public static final String CLOSE_TAG_SLASH = "closeTagSlash";
     public static final String CLOSE_TAG_NAME = "closeTagName";
     public static final String WAIT_END_TAG_CLOSE = "waitEndTagClose";
+    public static final String PROCESS_INSTRUCTION = "processInstruction";
 
 
     public static final char LT = '<';
@@ -28,6 +29,7 @@ public class SyntaxState {
     public static final char EQ = '=';
     public static final char D_QUOT = '"';
     public static final char S_QUOT = '\'';
+    public static final char QUESTION_MARK = '?';
 
     public static final char UNDERSCORE = '_';
     public static final char COLON = ':';

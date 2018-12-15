@@ -39,7 +39,7 @@ public class XmlSyntaxChecker {
     public String check(String src) {
         src = src + " ";
         char[] reader = src.toCharArray();
-        System.out.println(reader);
+//        System.out.println(reader);
         StringBuilder openTag = new StringBuilder();
         boolean isEmptyTag = false, isOpenTag = false, isCloseTag = false;
         StringBuilder closeTag = new StringBuilder();
@@ -208,7 +208,7 @@ public class XmlSyntaxChecker {
                 case CLOSE_BRACKET:
                     if (isOpenTag) {//todo:check tag exist
                         //OPEN TAG
-                        String openTagName = openTag.toString().toLowerCase();
+                        String openTagName = openTag.toString();
 
                         ElementData elementData = stack.peek();
                         Element currentElement = elementData.getTemplateElement();
@@ -249,7 +249,7 @@ public class XmlSyntaxChecker {
                         attributes.clear();
                     } else if (isCloseTag) {
                         //CLOSE TAG
-                        String closeTagName = closeTag.toString().toLowerCase();
+                        String closeTagName = closeTag.toString();
 
                         ElementData elementData = stack.peek();
                         Element currentElement = elementData.getTemplateElement();
@@ -328,7 +328,7 @@ public class XmlSyntaxChecker {
         }//end for reader
 
 
-        return stack.get(0).toString();
+        return stack.get(0).toString("");
     }
 
     private Character quote;

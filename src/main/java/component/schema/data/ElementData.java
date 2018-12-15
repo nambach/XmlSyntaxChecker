@@ -77,10 +77,11 @@ public class ElementData {
         return abandonedContents;
     }
 
-    @Override
-    public String toString() {
+    private static final String INDENT_OFFSET = "    ";
+
+    public String toString(String indent) {
         if (name.equals("document")) {
-            return innerElements.get(templateElement.getChildElements().get(0).getName()).get(0).toString();
+            return innerElements.get(templateElement.getChildElements().get(0).getName()).get(0).toString(indent);
         }
 
         StringBuilder builder = new StringBuilder();
@@ -88,10 +89,10 @@ public class ElementData {
         String attributeList = XmlSyntaxChecker.convert(attributes);
 
         if (Element.TYPE.EMPTY.equals(templateElement.getType())) {
-            builder.append(LT).append(name).append(attributeList).append(SLASH).append(GT);
+            builder.append(indent).append(LT).append(name).append(attributeList).append(SLASH).append(GT);
         } else {
-            String openTag = String.format("<%s%s>", name, attributeList);
-            String closeTag = String.format("</%s>", name);
+            String openTag = String.format("%s<%s%s>", indent, name, attributeList);
+            String closeTag = String.format("</%s>\n", name);
 
             switch (templateElement.getType()) {
                 case Element.TYPE.TEXT_ONLY:
@@ -99,22 +100,22 @@ public class ElementData {
                     break;
 
                 case Element.TYPE.ELEMENT_ONLY:
-                    builder.append(openTag);
+                    builder.append(openTag).append("\n");
 
                     for (Element element : templateElement.getChildElements()) {
                         List<ElementData> data = innerElements.get(element.getName());
 
                         if (data != null) {
                             for (ElementData elementData : data) {
-                                builder.append(elementData.toString());
+                                builder.append(elementData.toString(indent + INDENT_OFFSET));
                             }
                         } else if (element.getMin() == 1) {
                             ElementData stubData = new ElementData(element);
-                            builder.append(stubData);
+                            builder.append(stubData.toString(indent + INDENT_OFFSET));
                         }
                     }
 
-                    builder.append(closeTag);
+                    builder.append(indent).append(closeTag);
                     break;
             }
         }

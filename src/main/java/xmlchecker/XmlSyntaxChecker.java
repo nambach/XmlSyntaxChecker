@@ -33,7 +33,7 @@ public class XmlSyntaxChecker {
     }
 
     private boolean checkTagExist(String tagName) {
-        return rootElement.containsDescendant(tagName);
+        return rootElement.containsDescendant(tagName) || rootElement.getName().equals(tagName);
     }
 
     public String check(String src) {
@@ -208,10 +208,11 @@ public class XmlSyntaxChecker {
                     break;
 
                 case CLOSE_BRACKET:
-                    if (isOpenTag) {//todo:check tag exist
-                        //OPEN TAG
-                        String openTagName = openTag.toString();
+                    String openTagName = openTag.toString();
+                    String closeTagName = closeTag.toString();
 
+                    if (isOpenTag && checkTagExist(openTagName)) {
+                        //OPEN TAG
                         ElementData elementData = stack.peek();
                         Element currentElement = elementData.getTemplateElement();
 
@@ -249,10 +250,9 @@ public class XmlSyntaxChecker {
                         }
 
                         attributes.clear();
-                    } else if (isCloseTag) {
-                        //CLOSE TAG
-                        String closeTagName = closeTag.toString();
 
+                    } else if (isCloseTag && checkTagExist(closeTagName) && !closeTagName.equals(rootElement.getName())) {
+                        //CLOSE TAG
                         ElementData elementData = stack.peek();
                         Element currentElement = elementData.getTemplateElement();
                         ElementData oldElementData = stack.peek();

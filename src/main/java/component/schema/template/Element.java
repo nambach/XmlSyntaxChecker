@@ -151,7 +151,7 @@ public class Element {
     public boolean containsParent(String tagName) {
         Element temp = this.parent;
         while (temp != null) {
-            if (temp.name.equals(tagName)) { //todo: exclude the document and the root tag, to prevent xml to be cut unpredicted by any close root tag
+            if (temp.name.equals(tagName)) {
                 return true;
             }
             temp = temp.parent;

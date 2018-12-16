@@ -216,16 +216,12 @@ public class XmlSyntaxChecker {
                         ElementData elementData = stack.peek();
                         Element currentElement = elementData.getTemplateElement();
 
-                        if (!currentElement.containsDescendant(openTagName) && checkTagExist(openTagName)) {
+                        //pop out all tags until finding out the current tag's parent
+                        while (!currentElement.containsDescendant(openTagName)) {
+                            stack.pop();
 
-                            //pop out all tags until finding out the current tag's parent
-                            do {
-                                stack.pop();
-
-                                elementData = stack.peek();
-                                currentElement = elementData.getTemplateElement();
-
-                            } while (!currentElement.containsDescendant(openTagName));
+                            elementData = stack.peek();
+                            currentElement = elementData.getTemplateElement();
                         }
 
                         //Insert current tag as normal
@@ -257,43 +253,44 @@ public class XmlSyntaxChecker {
                         Element currentElement = elementData.getTemplateElement();
                         ElementData oldElementData = stack.peek();
 
-                        if (currentElement.getName().equals(closeTagName)) {
-                            //case 1: close tag normally
+                        while (!currentElement.containsDescendant(closeTagName)) {
                             stack.pop();
-                        } else if (checkTagExist(closeTagName)) {
 
-                            while (!currentElement.containsDescendant(closeTagName)) {
-                                stack.pop();
+                            elementData = stack.peek();
+                            currentElement = elementData.getTemplateElement();
+                        }
 
-                                elementData = stack.peek();
-                                currentElement = elementData.getTemplateElement();
+                        if (!oldElementData.getTemplateElement().containsParent(closeTagName)
+                                && !oldElementData.getName().equals(closeTagName)) {
+                            //case 3.b: current close tag is not parent of top-stack tag, but a sibling of its parent
+
+                            Element targetElement = currentElement.getDescendantElement(closeTagName);
+                            List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
+
+                            for (Element missingElement : missingElements) {
+                                ElementData newElementData = new ElementData(missingElement);
+                                elementData.addInnerElement(newElementData);
+                                stack.push(newElementData);
+                                elementData = newElementData;
                             }
 
-                            if (!oldElementData.getTemplateElement().containsParent(closeTagName)) {
-                                //case 3.b: current close tag is not parent of top-stack tag, but a sibling of its parent
-
-                                Element targetElement = currentElement.getDescendantElement(closeTagName);
-                                List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
-
-                                for (Element missingElement : missingElements) {
-                                    ElementData newElementData = new ElementData(missingElement);
-                                    elementData.addInnerElement(newElementData);
-                                    stack.push(newElementData);
-                                    elementData = newElementData;
-                                }
-
-                                String contentStr = !oldElementData.getAbandonedContents().isEmpty()
-                                        ? oldElementData.getAbandonedContents().pop()
-                                        : "";
-                                elementData.setContent(contentStr);
-                                stack.pop();
-                            }
+                            String contentStr = !oldElementData.getAbandonedContents().isEmpty()
+                                    ? oldElementData.getAbandonedContents().pop()
+                                    : "";
+                            elementData.setContent(contentStr);
+                            stack.pop();
                         }
                     }
 
                     content.setLength(0);
                     if (c == LT) {
                         state = OPEN_BRACKET;
+
+                        //For this case, without below code snippet, year would had got value "a" instead of empty string
+                        //<book>a
+                        //      b</authors></year>
+                        //</book>
+                        stack.peek().getAbandonedContents().push("");
                     } else {
                         state = CONTENT;
                         content.append(c);

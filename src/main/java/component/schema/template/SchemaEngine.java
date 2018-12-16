@@ -1,13 +1,14 @@
 package component.schema.template;
 
-import com.sun.org.apache.xerces.internal.impl.xs.XSImplementationImpl;
-import com.sun.org.apache.xerces.internal.xs.*;
+import org.apache.xerces.impl.xs.XSImplementationImpl;
+import org.apache.xerces.xs.*;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.sun.org.apache.xerces.internal.xs.XSConstants.*;
+import static org.apache.xerces.xs.XSConstants.*;
+
 
 public class SchemaEngine {
 
@@ -129,10 +130,12 @@ public class SchemaEngine {
 
     private static XSModel getSchemaModel(String path) {
         try {
-            System.setProperty(DOMImplementationRegistry.PROPERTY, "com.sun.org.apache.xerces.internal.dom.DOMXSImplementationSourceImpl");
+            System.setProperty(DOMImplementationRegistry.PROPERTY,
+                    "org.apache.xerces.dom.DOMXSImplementationSourceImpl");
             DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
 
-            XSImplementationImpl impl = (XSImplementationImpl) registry.getDOMImplementation("XS-Loader");
+            XSImplementation impl =
+                    (XSImplementation) registry.getDOMImplementation("XS-Loader");
             XSLoader schemaLoader = impl.createXSLoader(null);
 
             return schemaLoader.loadURI(path);

@@ -1,8 +1,8 @@
 package xmlchecker;
 
-import component.schema.data.ElementData;
-import component.schema.template.Element;
-import component.schema.template.SchemaEngine;
+import schema.data.ElementData;
+import schema.template.Element;
+import schema.template.SchemaEngine;
 
 import java.util.*;
 

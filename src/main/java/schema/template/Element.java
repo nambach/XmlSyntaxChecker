@@ -1,4 +1,4 @@
-package component.schema.template;
+package schema.template;
 
 import java.util.LinkedList;
 import java.util.List;

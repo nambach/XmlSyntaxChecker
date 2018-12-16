@@ -1,6 +1,6 @@
-package component.schema.data;
+package schema.data;
 
-import component.schema.template.Element;
+import schema.template.Element;
 import xmlchecker.XmlSyntaxChecker;
 
 import java.util.LinkedHashMap;

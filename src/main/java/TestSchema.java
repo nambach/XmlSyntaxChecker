@@ -1,7 +1,5 @@
-import component.schema.template.Element;
-import component.schema.template.SchemaEngine;
-
-import java.util.List;
+import schema.template.Element;
+import schema.template.SchemaEngine;
 
 public class TestSchema {
 

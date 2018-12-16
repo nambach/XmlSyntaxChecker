@@ -1,6 +1,5 @@
-package component.schema.template;
+package schema.template;
 
-import org.apache.xerces.impl.xs.XSImplementationImpl;
 import org.apache.xerces.xs.*;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 

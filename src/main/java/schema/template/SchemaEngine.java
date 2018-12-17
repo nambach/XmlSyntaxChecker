@@ -49,8 +49,7 @@ public class SchemaEngine {
 
         switch (type.getTypeCategory()) {
             case XSTypeDefinition.SIMPLE_TYPE:
-                //displaySimpleType(current, element);
-                current.setType(Element.TYPE.TEXT_ONLY);
+                displaySimpleType(current, type);
                 break;
             case XSTypeDefinition.COMPLEX_TYPE:
                 displayComplexType(current, type);
@@ -61,6 +60,7 @@ public class SchemaEngine {
     private static void displaySimpleType(Element current, XSTypeDefinition typeDefinition) {
 //        XSSimpleTypeDefinition simpleTypeDefinition = (XSSimpleTypeDefinition) typeDefinition;
 //        String type = builtinTypes.get(simpleTypeDefinition.getBuiltInKind());
+        current.setType(Element.TYPE.TEXT_ONLY);
     }
 
     private static void displayComplexType(Element current, XSTypeDefinition typeDefinition) {

@@ -78,10 +78,13 @@ public class ElementData {
     }
 
     private static final String INDENT_OFFSET = "    ";
+    public static final String ABSTRACT_ROOT_ELEMENT = "#abstractRoot";
 
     public String toString(String indent) {
-        if (name.equals("document")) {
-            return innerElements.get(templateElement.getChildElements().get(0).getName()).get(0).toString(indent);
+        if (ABSTRACT_ROOT_ELEMENT.equals(name)) {
+            for (List<ElementData> elementData : innerElements.values()) {
+                return elementData.get(0).toString(indent);
+            }
         }
 
         StringBuilder builder = new StringBuilder();

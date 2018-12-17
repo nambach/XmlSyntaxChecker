@@ -6,6 +6,7 @@ import schema.template.SchemaEngine;
 
 import java.util.*;
 
+import static schema.data.ElementData.ABSTRACT_ROOT_ELEMENT;
 import static xmlchecker.SyntaxState.*;
 
 public class XmlSyntaxChecker {
@@ -20,16 +21,12 @@ public class XmlSyntaxChecker {
     public void setSchema(String path) {
         rootElement = SchemaEngine.getRootElement(path);
 
-        Element grandElement = new Element(Element.TYPE.ELEMENT_ONLY, "document", null);
-        grandElement.addChildElement(rootElement);
-        rootElement.setParent(grandElement);
+        Element abstractElement = new Element(Element.TYPE.ELEMENT_ONLY, ABSTRACT_ROOT_ELEMENT, null);
+        abstractElement.addChildElement(rootElement);
+        rootElement.setParent(abstractElement);
 
-        ElementData grandData = new ElementData(grandElement);
-        stack.push(grandData);
-    }
-
-    private boolean checkContentEmpty(StringBuilder content) {
-        return content.toString().trim().equals("");
+        ElementData abstractElementData = new ElementData(abstractElement);
+        stack.push(abstractElementData);
     }
 
     private boolean checkTagExist(String tagName) {
@@ -39,7 +36,7 @@ public class XmlSyntaxChecker {
     public String check(String src) {
         src = src + " ";
         char[] reader = src.toCharArray();
-//        System.out.println(reader);
+
         StringBuilder openTag = new StringBuilder();
         boolean isEmptyTag = false, isOpenTag = false, isCloseTag = false;
         StringBuilder closeTag = new StringBuilder();

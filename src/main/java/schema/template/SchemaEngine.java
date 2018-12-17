@@ -28,7 +28,8 @@ public class SchemaEngine {
         XSObject root = model.getComponents(ELEMENT_DECLARATION).item(0);
         XSElementDeclaration declaration = (XSElementDeclaration) root;
 
-        Element rootElement = new Element(Element.TYPE.ELEMENT_ONLY, declaration.getName(), null);
+        Element rootElement =
+                new Element(Element.TYPE.ELEMENT_ONLY, declaration.getName(), null);
         iterate(rootElement, declaration.getTypeDefinition());
 
         return rootElement;
@@ -47,7 +48,8 @@ public class SchemaEngine {
     }
 
     private static void displaySimpleType(Element current, XSTypeDefinition typeDefinition) {
-//        XSSimpleTypeDefinition simpleTypeDefinition = (XSSimpleTypeDefinition) typeDefinition;
+//        XSSimpleTypeDefinition simpleTypeDefinition =
+//                (XSSimpleTypeDefinition) typeDefinition;
 //        String type = builtinTypes.get(simpleTypeDefinition.getBuiltInKind());
         current.setType(Element.TYPE.TEXT_ONLY);
     }
@@ -100,9 +102,11 @@ public class SchemaEngine {
 
                 switch (particleItem.getTerm().getType()) {
                     case ELEMENT_DECLARATION:
-                        XSElementDeclaration declaration = (XSElementDeclaration) particleItem.getTerm();
+                        XSElementDeclaration declaration =
+                                (XSElementDeclaration) particleItem.getTerm();
 
-                        Element innerElement = new Element(null, declaration.getName(), current);
+                        Element innerElement =
+                                new Element(null, declaration.getName(), current);
                         innerElement.setMin(particleItem.getMinOccurs());
                         innerElement.setMax(particleItem.getMaxOccurs());
                         innerElement.setUnbounded(particleItem.getMaxOccursUnbounded());

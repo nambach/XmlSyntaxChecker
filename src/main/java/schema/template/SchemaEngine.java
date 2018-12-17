@@ -19,6 +19,23 @@ public class SchemaEngine {
         compositors.put(XSModelGroup.COMPOSITOR_ALL, Element.INDICATOR.ALL);
     }
 
+    private static XSModel getSchemaModel(String path) {
+        try {
+            System.setProperty(DOMImplementationRegistry.PROPERTY,
+                    "org.apache.xerces.dom.DOMXSImplementationSourceImpl");
+            DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+
+            XSImplementation impl =
+                    (XSImplementation) registry.getDOMImplementation("XS-Loader");
+            XSLoader schemaLoader = impl.createXSLoader(null);
+
+            return schemaLoader.loadURI(path);
+        } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static Element getRootElement(String xsdPath) {
         XSModel model = getSchemaModel(xsdPath);
         if (model == null) {
@@ -117,23 +134,6 @@ public class SchemaEngine {
                         break;
                 }
             }
-        }
-    }
-
-    private static XSModel getSchemaModel(String path) {
-        try {
-            System.setProperty(DOMImplementationRegistry.PROPERTY,
-                    "org.apache.xerces.dom.DOMXSImplementationSourceImpl");
-            DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
-
-            XSImplementation impl =
-                    (XSImplementation) registry.getDOMImplementation("XS-Loader");
-            XSLoader schemaLoader = impl.createXSLoader(null);
-
-            return schemaLoader.loadURI(path);
-        } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
         }
     }
 }

@@ -12,22 +12,11 @@ import static org.apache.xerces.xs.XSConstants.*;
 public class SchemaEngine {
 
     private static Map<Short, String> compositors = new HashMap<>();
-    private static Map<Short, String> attrType = new HashMap<>();
-    private static Map<Short, String> builtinTypes = new HashMap<>();
 
     static {
         compositors.put(XSModelGroup.COMPOSITOR_SEQUENCE, Element.INDICATOR.SEQUENCE);
         compositors.put(XSModelGroup.COMPOSITOR_CHOICE, Element.INDICATOR.CHOICE);
         compositors.put(XSModelGroup.COMPOSITOR_ALL, Element.INDICATOR.ALL);
-
-        attrType.put(VC_DEFAULT, "default");
-        attrType.put(VC_FIXED, "fixed");
-        attrType.put(VC_NONE, "none");
-
-        builtinTypes.put(INTEGER_DT, "integer");
-        builtinTypes.put(INT_DT, "int");
-        builtinTypes.put(STRING_DT, "string");
-        builtinTypes.put(FLOAT_DT, "float");
     }
 
     public static Element getRootElement(String xsdPath) {

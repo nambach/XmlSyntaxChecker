@@ -64,9 +64,4 @@ public class SyntaxState {
     public static boolean isSpace(char c) {
         return Character.isSpaceChar(c) || c == '\n';
     }
-
-    public static final List<String> INLINE_TAGS = Arrays.asList(
-            "area", "base", "br", "col", "command",
-            "embed", "hr", "img", "input", "keygen",
-            "link", "meta", "param", "source", "track", "wbr");
 }

@@ -7,7 +7,8 @@ public class TestChecker {
         XmlSyntaxChecker checker = new XmlSyntaxChecker();
         checker.setSchema("src/main/resources/static/xsd/book.xsd");
 
-        String src = FileUtils.readTextContent("src/main/resources/static/xml/book.xml");
+        String src = FileUtils.readTextContent(
+                "src/main/resources/static/xml/book.xml");
         System.out.println(checker.check(src));
     }
 }

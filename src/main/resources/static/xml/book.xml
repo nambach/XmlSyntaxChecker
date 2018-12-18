@@ -1,6 +1,10 @@
 <books xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns="http://nambm.io/book"
        xsi:schemaLocation="http://nambm.io/book ../xsd/book.xsd">
-    <title>The Alchemist
-        Paulo Coelho</authors>
-    2015</year>
+    <book>
+        <title>The Alchemist</title>
+        <authors>Paulo Coelho</authors>
+        <year>2015</year>
+    </book>
+</books>
+

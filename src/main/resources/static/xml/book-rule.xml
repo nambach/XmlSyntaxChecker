@@ -2,18 +2,18 @@
 <rules xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns="http://nambm.io/crawling-rule"
        xsi:schemaLocation="http://nambm.io/crawling-rule ../xsd/crawling.xsd">
-
-                  Vinabook</siteName>
-        <basedUrl>https://www.vinabook.com/
-
-
-                      Sách vừa phát hành trong tuần</topicName>
-                       newArr</topicCode>
+    <rule>
+        <siteName>Vinabook</siteName>
+        <basedUrl>https://www.vinabook.com/</basedUrl>
+        <topics>
+            <topic>
+                <topicName>Sách vừa phát hành trong tuần</topicName>
+                <topicCode>newArr</topicCode>
                 <url incrementParam="?page={i}" to="5">https://www.vinabook.com/sach-moi-phat-hanh</url>
-                <fragmentXpath>//table[contains(@class, "template-products")]
+                <fragmentXpath>//table[contains(@class, "template-products")]</fragmentXpath>
             </topic>
-
-                           Kho Sách Giảm Giá</topicName>
+            <topic>
+                <topicName>Kho Sách Giảm Giá</topicName>
                 <topicCode>sale</topicCode>
                 <url incrementParam="?page={i}" to="5">https://www.vinabook.com/kho-sach-giam-gia</url>
                 <fragmentXpath>//table[contains(@class, "template-products")]</fragmentXpath>
@@ -22,6 +22,7 @@
         <collectionXpath>*//td[contains(@class, "compact")]</collectionXpath>
         <item>
             <detailXpath detailName="id" prefix="VNB_" isRequired="true">/@value</detailXpath>
-            *//a[contains(@class, "product-title")]/text()</detailXpath>
+            <detailXpath detailName="title">*//a[contains(@class, "product-title")]/text()</detailXpath>
+        </item>
     </rule>
 </rules>

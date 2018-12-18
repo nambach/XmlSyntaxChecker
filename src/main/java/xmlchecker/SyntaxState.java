@@ -1,8 +1,5 @@
 package xmlchecker;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class SyntaxState {
 
     public static final String CONTENT = "content";
@@ -30,6 +27,7 @@ public class SyntaxState {
     public static final char D_QUOT = '"';
     public static final char S_QUOT = '\'';
     public static final char QUESTION_MARK = '?';
+    public static final char NEW_LINE = '\n';
 
     public static final char UNDERSCORE = '_';
     public static final char COLON = ':';
@@ -62,6 +60,6 @@ public class SyntaxState {
     }
 
     public static boolean isSpace(char c) {
-        return Character.isSpaceChar(c) || c == '\n';
+        return Character.isSpaceChar(c) || c == NEW_LINE;
     }
 }

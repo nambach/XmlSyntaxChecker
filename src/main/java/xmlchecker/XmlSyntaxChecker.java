@@ -21,7 +21,8 @@ public class XmlSyntaxChecker {
     public void setSchema(String path) {
         rootElement = SchemaEngine.getRootElement(path);
 
-        Element abstractElement = new Element(Element.TYPE.ELEMENT_ONLY, ABSTRACT_ROOT_ELEMENT, null);
+        Element abstractElement =
+                new Element(Element.TYPE.ELEMENT_ONLY, ABSTRACT_ROOT_ELEMENT, null);
         abstractElement.addChildElement(rootElement);
         rootElement.setParent(abstractElement);
 
@@ -223,7 +224,8 @@ public class XmlSyntaxChecker {
 
                         //Insert current tag as normal
                         Element targetElement = currentElement.getDescendantElement(openTagName);
-                        List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
+                        List<Element> missingElements =
+                                targetElement.getParentTreeExclusive(currentElement.getName());
 
                         //Create the missing path
                         for (Element missingElement : missingElements) {
@@ -244,12 +246,14 @@ public class XmlSyntaxChecker {
 
                         attributes.clear();
 
-                    } else if (isCloseTag && checkTagExist(closeTagName) && !closeTagName.equals(rootElement.getName())) {
+                    } else if (isCloseTag && checkTagExist(closeTagName)
+                            && !closeTagName.equals(rootElement.getName())) {
                         //CLOSE TAG
                         ElementData elementData = stack.peek();
                         Element currentElement = elementData.getTemplateElement();
                         ElementData oldElementData = stack.peek();
 
+                        //pop out all tags until finding out the current tag's parent
                         while (!currentElement.containsDescendant(closeTagName)) {
                             stack.pop();
 
@@ -257,12 +261,14 @@ public class XmlSyntaxChecker {
                             currentElement = elementData.getTemplateElement();
                         }
 
+                        // current close tag is not for closing existing elements that already in stack,
+                        // but for one that doesn't exist yet
                         if (!oldElementData.getTemplateElement().containsParent(closeTagName)
                                 && !oldElementData.getName().equals(closeTagName)) {
-                            //case 3.b: current close tag is not parent of top-stack tag, but a sibling of its parent
 
                             Element targetElement = currentElement.getDescendantElement(closeTagName);
-                            List<Element> missingElements = targetElement.getParentTreeExclusive(currentElement.getName());
+                            List<Element> missingElements =
+                                    targetElement.getParentTreeExclusive(currentElement.getName());
 
                             for (Element missingElement : missingElements) {
                                 ElementData newElementData = new ElementData(missingElement);
@@ -271,6 +277,7 @@ public class XmlSyntaxChecker {
                                 elementData = newElementData;
                             }
 
+                            //Set content got from cache of previous element
                             String contentStr = !oldElementData.getAbandonedContents().isEmpty()
                                     ? oldElementData.getAbandonedContents().pop()
                                     : "";
@@ -283,7 +290,8 @@ public class XmlSyntaxChecker {
                     if (c == LT) {
                         state = OPEN_BRACKET;
 
-                        //For this case, without below code snippet, year would had got value "a" instead of empty string
+                        //For this case, without below code snippet,
+                        // year would had got value "a" instead of empty string
                         //<book>a
                         //      b</authors></year>
                         //</book>
